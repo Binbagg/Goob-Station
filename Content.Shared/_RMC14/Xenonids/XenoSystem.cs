@@ -176,12 +176,6 @@ public sealed class XenoSystem : EntitySystem
     {
         if (args.Cancelled)
             return;
-
-        if (HasComp<LatheComponent>(args.Target) ||
-            HasComp<CMAutomatedVendorComponent>(args.Target))
-        {
-            args.Cancel();
-        }
     }
 
     private void OnXenoGetMeleeDamage(Entity<XenoComponent> ent, ref GetMeleeDamageEvent args)
@@ -227,26 +221,6 @@ public sealed class XenoSystem : EntitySystem
     {
         // leaving the hive makes you lose container vision post hijack :)
         _nightVision.SetSeeThroughContainers(ent.Owner, args.Hive?.Comp.SeeThroughContainers ?? false);
-    }
-
-    private void OnXenoIgnite(Entity<XenoComponent> ent, ref RMCIgniteEvent args)
-    {
-        foreach (var held in _hands.EnumerateHeld(ent).ToArray())
-        {
-            if (!HasComp<XenoParasiteComponent>(held))
-                continue;
-
-            var damage = new DamageSpecifier
-            {
-                DamageDict =
-                {
-                    [HeatDamage] = 100,
-                },
-            };
-
-            _damageable.TryChangeDamage(held, damage, true);
-            _hands.TryDrop(ent, held);
-        }
     }
 
     private void OnXenoCanDrag(Entity<XenoComponent> ent, ref CanDragEvent args)
@@ -304,9 +278,6 @@ public sealed class XenoSystem : EntitySystem
 
     public void HealDamage(Entity<DamageableComponent?> xeno, FixedPoint2 amount)
     {
-        if (_rmcFlammable.IsOnFire(xeno.Owner))
-            return;
-
         if (!_damageableQuery.Resolve(xeno, ref xeno.Comp, false) ||
             xeno.Comp.Damage.GetTotal() <= FixedPoint2.Zero)
         {
@@ -348,7 +319,7 @@ public sealed class XenoSystem : EntitySystem
         if (_xenoNestedQuery.HasComp(target))
             return false;
 
-        return HasComp<MarineComponent>(target) || hitNonMarines;
+        return true;
     }
 
     public bool CanHeal(EntityUid xeno)
@@ -365,9 +336,6 @@ public sealed class XenoSystem : EntitySystem
         while (xenos.MoveNext(out _, out _, out var mobState, out var xform))
         {
             if (mobState.CurrentState == MobState.Dead)
-                continue;
-
-            if (!_rmcPlanet.IsOnPlanet(xform))
                 continue;
 
             count++;
