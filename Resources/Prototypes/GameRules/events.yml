@@ -43,6 +43,7 @@
     - id: LoneAbductorSpawn # Shitmed - Starlight Abductors
     - id: DuoAbductorSpawn # Shitmed - Starlight Abductors
     - id: BingleSpawn #Goobstation - Bingle
+    - id: XenonidsSpawn # Goobstation - Xenonids
 
 - type: entity
   id: BaseStationEvent
@@ -603,3 +604,15 @@
       min: 1
       max: 1
       pickPlayer: false
+
+- type: entity
+  parent: BaseGameRule
+  id: XenonidsSpawn
+  components:
+  - type: StationEvent
+    weight: 1
+    duration: 1
+    earliestStart: 1
+    minimumPlayers: 0
+  - type: RandomSpawnRule
+    prototype: MobXenoDrone
