@@ -5,13 +5,12 @@
   - CMXenoTail
   - CMXenoFlammable
   - RMCXenoSpeechSounds
-  - RMCXenoCommendationReceiver
   id: CMXenoDroneBase
   name: Drone
   description: An alien drone.
   components:
   - type: GhostRole
-    name: cm-job-name-xeno-drone
+    name: Drone
   - type: MobState
     allowedStates:
     - Alive
@@ -57,8 +56,6 @@
       components:
       - XenoParasite
       - XenoEgg
-      - XenoFruit
-  - type: TunnelRenamer
   - type: EggPlantTime
     plantTime: 2.5
   - type: MultiHandedHolder
@@ -80,18 +77,12 @@
   - type: XenoEvolution
     canEvolveWithoutGranter: true
     max: 200
-    evolvesTo:
-    - CMXenoCarrier
-    - CMXenoBurrower
-    - CMXenoHivelord
     evolvesToWithoutPoints:
     - CMXenoQueen
   - type: Evasion
     evasion: 20
   - type: XenoInhands
     prefix: drone
-  - type: IntelRecoverCorpseObjectiveOnDeath
-    value: 0.1
 
 - type: entity
   parent: CMXenoDroneBase
@@ -118,139 +109,8 @@
     - CMXenoDroneGardener
     - CMXenoDroneHealer
   - type: XenoAcid
-  - type: AcidTrap
-    trapLevel: 1
-    cost: 70
-    spray: XenoAcidSprayTrapWeak
   - type: XenoConstruction
     canBuild:
     - WallXenoResin
     - WallXenoMembrane
     - DoorXenoResin
-    - XenoStickyResin
-    - XenoFastResin
-
-- type: entity
-  parent: CMXenoDroneBase
-  id: CMXenoDroneGardener
-  suffix: Gardener
-  components:
-  - type: Sprite
-    sprite: _RMC14/Mobs/Xenonids/Drone/gardener_drone.rsi
-    layers:
-    - map: [ "enum.XenoVisualLayers.Base" ]
-      state: alive
-    - map: [ "enum.XenoFruitVisualLayers.Base" ]
-      visible: false
-    - map: [ "enum.RMCDamageVisualLayers.Base" ]
-      visible: false
-    - map: [ "enum.XenoInhandVisualLayers.Left" ]
-      visible: false
-    - map: [ "enum.XenoInhandVisualLayers.Right" ]
-      visible: false
-  - type: XenoFruitPlanterVisuals
-    rsi: _RMC14/Mobs/Xenonids/Drone/gardener_drone.rsi
-    prefix: gardener
-  - type: Xeno
-    actionIds:
-    - ActionXenoRest
-    - ActionXenoRegurgitate
-    - ActionXenoWatch
-    - ActionXenoTailStab
-    - ActionXenoPheromones
-    - ActionXenoOrderConstruction
-    - ActionXenoPlantWeeds
-    - ActionXenoPlantWeedsHardy
-    - ActionXenoFruitPlant
-    - ActionXenoFruitChoose
-    - ActionXenoResinSurge
-    - ActionXenoTransferPlasma
-    - ActionXenoDevolve
-    critHealMultiplier: 0.3465  # 5% increased regeneration
-    standHealingMultiplier: 0.42
-    restHealMultiplier: 1.05
-    hidden: true
-  - type: XenoStrain
-    name: rmc-xeno-gardener-name
-    description: rmc-xeno-gardener-description
-    popup: rmc-xeno-gardener-popup
-  - type: XenoFruitPlanter
-    canPlant:
-    - XenoFruitGreater
-    - XenoFruitPlasma
-    - XenoFruitSpeed
-    - XenoFruitSpore
-    - XenoFruitUnstable
-    maxFruitAllowed: 6
-  - type: XenoResinSurge
-
-- type: entity
-  parent: CMXenoDroneBase
-  id: CMXenoDroneHealer
-  suffix: Healer
-  components:
-  - type: Sprite
-    sprite: _RMC14/Mobs/Xenonids/Drone/healer_drone.rsi
-    layers:
-    - map: [ "enum.XenoVisualLayers.Base" ]
-      state: alive
-    - map: [ "enum.XenoHealerVisualLayers.Goop" ]
-      visible: false
-    - map: [ "enum.RMCDamageVisualLayers.Base" ]
-      visible: false
-    - map: [ "enum.XenoInhandVisualLayers.Left" ]
-      visible: false
-    - map: [ "enum.XenoInhandVisualLayers.Right" ]
-      visible: false
-  - type: RMCXenoDamageVisuals
-    prefix: drone
-  - type: Xeno
-    actionIds:
-    - ActionXenoRest
-    - ActionXenoRegurgitate
-    - ActionXenoWatch
-    - ActionXenoTailStab
-    - ActionXenoAcidWeak
-    - ActionXenoPheromones
-    - ActionXenoOrderConstruction
-    - ActionXenoPlantWeeds
-    - ActionXenoFruitPlantLesser
-    - ActionXenoApplySalve
-    - ActionXenoHealerDroneTransferPlasma
-    - ActionXenoSacrifice
-    - ActionXenoDevolve
-    hidden: true
-  - type: XenoPlasma
-    plasma: 1000
-    maxPlasma: 1000
-    plasmaRegenOnWeeds: 4.5
-    plasmaTransferDelay: 1.5
-  - type: MeleeWeapon
-    damage:
-      groups:
-        Brute: 17
-  - type: XenoPheromones
-    pheromonesMultiplier: 3
-  - type: XenoStrain
-    name: rmc-xeno-healer-name
-    description: rmc-xeno-healer-description
-    popup: rmc-xeno-healer-popup
-  - type: XenoFruitPlanter
-    fruitChoice: XenoFruitLesser
-    canPlant:
-    - XenoFruitLesser
-    maxFruitAllowed: 3
-  - type: Tackle
-    max: 4
-    stunMin: 3
-    stunMax: 4
-    chance: 0.30
-  - type: XenoEnergy
-    alert: XenoEnergyHealer
-    max: 7500
-    gain: 0
-    gainAttack: 0
-    gainAttackDowned: 0
-  - type: XenoAcid
-  - type: XenoSalveVisuals
-  #- type: XenoHealer
