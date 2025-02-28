@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 using Content.Shared.Access;
 using Content.Shared.Alert;
 using Content.Shared.Chat.Prototypes;
