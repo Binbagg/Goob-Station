@@ -30,4 +30,7 @@
       <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="_RMC14\UserInterface\" />
+  </ItemGroup>
 </Project>
