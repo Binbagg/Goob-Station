@@ -1,4 +1,3 @@
-using Content.Shared._RMC14.Weapons.Melee;
 using Content.Shared.Damage;
 using Content.Shared.Explosion;
 using Content.Shared.FixedPoint;
@@ -14,8 +13,7 @@ public sealed class SharedXenoConstructReinforceSystem : EntitySystem
 
     public override void Initialize()
     {
-        SubscribeLocalEvent<XenoConstructReinforceComponent, DamageModifyEvent>(OnReinforceDamageModify, after: [typeof(SharedRMCMeleeWeaponSystem)]);
-        SubscribeLocalEvent<XenoConstructReinforceComponent, BeforeExplodeEvent>(OnReinforceBeforeExplode);
+        SubscribeLocalEvent<XenoConstructReinforceComponent, DamageModifyEvent>(OnReinforceDamageModify);
     }
 
     public void Reinforce(EntityUid uid, FixedPoint2 amount, TimeSpan duration)
@@ -51,10 +49,6 @@ public sealed class SharedXenoConstructReinforceSystem : EntitySystem
         }
     }
 
-    private void OnReinforceBeforeExplode(Entity<XenoConstructReinforceComponent> ent, ref BeforeExplodeEvent args)
-    {
-        ReduceDamage(ent, ref args.Damage);
-    }
 
     private void OnReinforceDamageModify(Entity<XenoConstructReinforceComponent> ent, ref DamageModifyEvent args)
     {

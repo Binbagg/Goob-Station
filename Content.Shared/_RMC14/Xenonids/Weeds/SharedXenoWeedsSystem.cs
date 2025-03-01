@@ -1,9 +1,5 @@
-using Content.Shared._RMC14.Areas;
-using Content.Shared._RMC14.Armor;
 using Content.Shared._RMC14.Map;
 using Content.Shared._RMC14.Xenonids.Construction.FloorResin;
-using Content.Shared._RMC14.Xenonids.Construction.ResinHole;
-using Content.Shared._RMC14.Xenonids.Construction.Tunnel;
 using Content.Shared._RMC14.Xenonids.Hive;
 using Content.Shared._RMC14.Xenonids.Rest;
 using Content.Shared.Coordinates;
@@ -27,7 +23,6 @@ namespace Content.Shared._RMC14.Xenonids.Weeds;
 
 public abstract class SharedXenoWeedsSystem : EntitySystem
 {
-    [Dependency] private readonly AreaSystem _area = default!;
     [Dependency] private readonly SharedContainerSystem _container = default!;
     [Dependency] private readonly DamageableSystem _damageable = default!;
     [Dependency] private readonly IMapManager _map = default!;
@@ -81,12 +76,8 @@ public abstract class SharedXenoWeedsSystem : EntitySystem
         SubscribeLocalEvent<XenoWeedsSpreadingComponent, MapInitEvent>(OnSpreadingMapInit);
 
         SubscribeLocalEvent<ResinSlowdownModifierComponent, ComponentShutdown>(OnModifierShutdown);
-        SubscribeLocalEvent<ResinSlowdownModifierComponent, StartCollideEvent>(OnResinSlowdownStartCollide);
-        SubscribeLocalEvent<ResinSlowdownModifierComponent, EndCollideEvent>(OnResinSlowdownEndCollide);
 
         SubscribeLocalEvent<ResinSpeedupModifierComponent, ComponentShutdown>(OnModifierShutdown);
-        SubscribeLocalEvent<ResinSpeedupModifierComponent, StartCollideEvent>(OnResinSpeedupStartCollide);
-        SubscribeLocalEvent<ResinSpeedupModifierComponent, EndCollideEvent>(OnResinSpeedupEndCollide);
 
         UpdatesAfter.Add(typeof(SharedPhysicsSystem));
     }
@@ -178,10 +169,6 @@ public abstract class SharedXenoWeedsSystem : EntitySystem
             {
                 if (hive == null || !_hive.IsMember(contacting, hive.Hive))
                 {
-                    if (HasComp<RMCArmorSpeedTierUserComponent>(contacting))
-                        speedResin += slowResin.OutsiderSpeedModifierArmor;
-                    else
-                        speedResin += slowResin.OutsiderSpeedModifier;
 
                     entriesResin++;
                 }
@@ -212,10 +199,6 @@ public abstract class SharedXenoWeedsSystem : EntitySystem
             }
             else if (hive == null || !_hive.IsMember(contacting, hive.Hive))
             {
-                if (HasComp<RMCArmorSpeedTierUserComponent>(contacting))
-                    speedWeeds += weeds.SpeedMultiplierOutsiderArmor;
-                else
-                    speedWeeds += weeds.SpeedMultiplierOutsider;
 
                 entriesWeeds++;
             }
@@ -251,8 +234,6 @@ public abstract class SharedXenoWeedsSystem : EntitySystem
         args.ModifySpeed(finalSpeed, finalSpeed);
 
         ent.Comp.OnXenoWeeds = anyWeeds;
-        ent.Comp.OnXenoSlowResin = anySlowResin;
-        ent.Comp.OnXenoFastResin = anyFastResin;
         Dirty(ent);
     }
 
@@ -317,33 +298,6 @@ public abstract class SharedXenoWeedsSystem : EntitySystem
             _toUpdate.Add(other);
     }
 
-    private void OnResinSlowdownStartCollide(Entity<ResinSlowdownModifierComponent> ent, ref StartCollideEvent args)
-    {
-        var other = args.OtherEntity;
-        if (_affectedQuery.TryComp(other, out var affected) && !affected.OnXenoSlowResin)
-            _toUpdate.Add(other);
-    }
-
-    private void OnResinSlowdownEndCollide(Entity<ResinSlowdownModifierComponent> ent, ref EndCollideEvent args)
-    {
-        var other = args.OtherEntity;
-        if (_affectedQuery.TryComp(other, out var affected) && affected.OnXenoSlowResin)
-            _toUpdate.Add(other);
-    }
-
-    private void OnResinSpeedupStartCollide(Entity<ResinSpeedupModifierComponent> ent, ref StartCollideEvent args)
-    {
-        var other = args.OtherEntity;
-        if (_affectedQuery.TryComp(other, out var affected) && !affected.OnXenoFastResin)
-            _toUpdate.Add(other);
-    }
-
-    private void OnResinSpeedupEndCollide(Entity<ResinSpeedupModifierComponent> ent, ref EndCollideEvent args)
-    {
-        var other = args.OtherEntity;
-        if (_affectedQuery.TryComp(other, out var affected) && affected.OnXenoFastResin)
-            _toUpdate.Add(other);
-    }
 
     private void OnSpreadingMapInit(Entity<XenoWeedsSpreadingComponent> ent, ref MapInitEvent args)
     {
@@ -362,19 +316,6 @@ public abstract class SharedXenoWeedsSystem : EntitySystem
             _popup.PopupClient(msg, user.Value, user.Value, PopupType.SmallCaution);
         }
 
-        if (!_mapSystem.TryGetTileRef(grid, grid, tile, out var tileRef) ||
-            !_tile.TryGetDefinition(tileRef.Tile.TypeId, out var tileDef) ||
-            tileDef.ID == ContentTileDefinition.SpaceID ||
-            (tileDef is ContentTileDefinition { WeedsSpreadable: false } &&
-            !(tileDef is ContentTileDefinition { SemiWeedable: true } && semiWeedable))
-            )
-        {
-            GenericPopup();
-            return false;
-        }
-
-        if (!_area.CanResinPopup((grid, grid, null), tile, user))
-            return false;
 
         var targetTileAnchored = _mapSystem.GetAnchoredEntitiesEnumerator(grid, grid, tile);
         while (targetTileAnchored.MoveNext(out var uid))
@@ -382,8 +323,6 @@ public abstract class SharedXenoWeedsSystem : EntitySystem
             if (_blockWeedsQuery.HasComp(uid))
                 return false;
 
-            if (source && HasComp<XenoResinHoleComponent>(uid))
-                return false;
         }
 
         return true;
@@ -408,8 +347,7 @@ public abstract class SharedXenoWeedsSystem : EntitySystem
         var query = EntityQueryEnumerator<DamageOffWeedsComponent, DamageableComponent>();
         while (query.MoveNext(out var uid, out var damage, out var damageable))
         {
-            if ((TryComp(uid, out AffectableByWeedsComponent? affected) && affected.OnXenoWeeds) ||
-                HasComp<InXenoTunnelComponent>(uid))
+            if ((TryComp(uid, out AffectableByWeedsComponent? affected) && affected.OnXenoWeeds))
             {
                 if (damage.DamageAt != null)
                 {

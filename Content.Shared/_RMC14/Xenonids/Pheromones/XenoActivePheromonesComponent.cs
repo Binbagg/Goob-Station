@@ -1,5 +1,4 @@
-﻿using Content.Shared._RMC14.Xenonids.HiveLeader;
-using Robust.Shared.GameStates;
+﻿using Robust.Shared.GameStates;
 
 namespace Content.Shared._RMC14.Xenonids.Pheromones;
 

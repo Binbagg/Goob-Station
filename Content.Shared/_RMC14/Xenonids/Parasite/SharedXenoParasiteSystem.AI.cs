@@ -4,14 +4,12 @@ using Content.Shared.Interaction.Events;
 using Content.Shared.Actions;
 using Content.Shared._RMC14.Xenonids.Rest;
 using Content.Shared._RMC14.Xenonids.Pheromones;
-using Content.Shared._RMC14.Xenonids.Projectile.Parasite;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
 using Robust.Shared.Containers;
 using Robust.Shared.Player;
 using Content.Shared._RMC14.Xenonids.Egg;
-using Content.Shared._RMC14.Xenonids.Construction.ResinHole;
 using Content.Shared.Throwing;
 using Content.Shared.Stunnable;
 using Content.Shared._RMC14.Xenonids.Leap;
@@ -135,7 +133,7 @@ public abstract partial class SharedXenoParasiteSystem
 
     public void HandleDeathTimer(Entity<ParasiteAIComponent> para)
     {
-        if (_container.TryGetContainingContainer((para, null, null), out var carry) && HasComp<XenoNurturingComponent>(carry.Owner))
+        if (_container.TryGetContainingContainer((para, null, null), out var carry))
         {
             para.Comp.DeathTime = null;
             if (para.Comp.Mode == ParasiteMode.Dying)
@@ -263,12 +261,6 @@ public abstract partial class SharedXenoParasiteSystem
         foreach (var egg in _entityLookup.GetEntitiesInRange<XenoEggComponent>(_transform.GetMoverCoordinates(para), para.Comp.RangeCheck))
         {
             if (egg.Comp.State == XenoEggState.Opened)
-                return;
-        }
-
-        foreach (var trap in _entityLookup.GetEntitiesInRange<XenoResinHoleComponent>(_transform.GetMoverCoordinates(para), para.Comp.RangeCheck))
-        {
-            if (trap.Comp.TrapPrototype == null)
                 return;
         }
 

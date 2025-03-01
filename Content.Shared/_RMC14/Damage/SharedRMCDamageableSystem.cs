@@ -1,7 +1,4 @@
-﻿using Content.Shared._RMC14.Armor;
-using Content.Shared._RMC14.Entrenching;
-using Content.Shared._RMC14.Map;
-using Content.Shared._RMC14.Marines.Orders;
+﻿using Content.Shared._RMC14.Map;
 using Content.Shared._RMC14.Xenonids.Construction.Nest;
 using Content.Shared._RMC14.Xenonids.Parasite;
 using Content.Shared._RMC14.Xenonids.Pheromones;
@@ -52,7 +49,6 @@ public abstract class SharedRMCDamageableSystem : EntitySystem
     private readonly HashSet<ProtoId<DamageTypePrototype>> _burnTypes = new();
     private readonly List<string> _types = [];
 
-    private EntityQuery<BarricadeComponent> _barricadeQuery;
     private EntityQuery<DamageableComponent> _damageableQuery;
     private EntityQuery<DamageOverTimeComponent> _damageOverTimeQuery;
     private EntityQuery<MobStateComponent> _mobStateQuery;
@@ -61,7 +57,6 @@ public abstract class SharedRMCDamageableSystem : EntitySystem
 
     public override void Initialize()
     {
-        _barricadeQuery = GetEntityQuery<BarricadeComponent>();
         _damageableQuery = GetEntityQuery<DamageableComponent>();
         _damageOverTimeQuery = GetEntityQuery<DamageOverTimeComponent>();
         _mobStateQuery = GetEntityQuery<MobStateComponent>();
@@ -78,7 +73,7 @@ public abstract class SharedRMCDamageableSystem : EntitySystem
             after:
             [
                 typeof(SharedArmorSystem), typeof(BlockingSystem), typeof(InventorySystem), typeof(SharedBorgSystem),
-                typeof(SharedMarineOrdersSystem), typeof(CMArmorSystem), typeof(SharedXenoPheromonesSystem)
+                typeof(SharedXenoPheromonesSystem)
             ]);
 
         SubscribeLocalEvent<GunDamageMultipliersComponent, AmmoShotEvent>(OnGunDamageMultipliersAmmoShot);
@@ -88,7 +83,7 @@ public abstract class SharedRMCDamageableSystem : EntitySystem
             after:
             [
                 typeof(SharedArmorSystem), typeof(BlockingSystem), typeof(InventorySystem), typeof(SharedBorgSystem),
-                typeof(SharedMarineOrdersSystem), typeof(CMArmorSystem), typeof(SharedXenoPheromonesSystem),
+                typeof(SharedXenoPheromonesSystem),
             ]);
 
         SubscribeLocalEvent<DamageDealtModifierComponent, GetMeleeDamageEvent>(OnDamageModifierGetMeleeDamage);
@@ -97,14 +92,14 @@ public abstract class SharedRMCDamageableSystem : EntitySystem
             after:
             [
                 typeof(SharedArmorSystem), typeof(BlockingSystem), typeof(InventorySystem), typeof(SharedBorgSystem),
-                typeof(SharedMarineOrdersSystem), typeof(CMArmorSystem), typeof(SharedXenoPheromonesSystem)
+                typeof(SharedXenoPheromonesSystem)
             ]);
 
         SubscribeLocalEvent<ProjectileDamageReceivedComponent, DamageModifyEvent>(OnProjectileDamageReceivedModify,
             after:
             [
                 typeof(SharedArmorSystem), typeof(BlockingSystem), typeof(InventorySystem), typeof(SharedBorgSystem),
-                typeof(SharedMarineOrdersSystem), typeof(CMArmorSystem), typeof(SharedXenoPheromonesSystem)
+                typeof(SharedXenoPheromonesSystem)
             ]);
 
         _bruteTypes.Clear();
@@ -129,8 +124,7 @@ public abstract class SharedRMCDamageableSystem : EntitySystem
 
     private void OnProjectileDamageReceivedModify(Entity<ProjectileDamageReceivedComponent> ent, ref DamageModifyEvent args)
     {
-        if (HasComp<ProjectileComponent>(args.Tool))
-            args.Damage *= ent.Comp.Multiplier;
+        args.Damage *= 1.2;
     }
 
     private void OnDamageMobStateMapInit(Entity<DamageMobStateComponent> ent, ref MapInitEvent args)
@@ -165,19 +159,7 @@ public abstract class SharedRMCDamageableSystem : EntitySystem
 
     private void OnMultiplierFlagsDamageModify(Entity<DamageMultiplierFlagsComponent> ent, ref DamageModifyEvent args)
     {
-        if (!_damageableQuery.HasComp(ent) ||
-            !TryComp(args.Tool, out DamageMultipliersComponent? multComponent))
-        {
-            return;
-        }
-
-        foreach (var flag in multComponent.Multipliers.Keys)
-        {
-            if ((ent.Comp.Flags & flag) == DamageMultiplierFlag.None)
-                continue;
-
-            args.Damage *= multComponent.Multipliers[flag];
-        }
+        args.Damage *= 1.2;
     }
 
     private void OnGunDamageMultipliersAmmoShot(Entity<GunDamageMultipliersComponent> ent, ref AmmoShotEvent args)
@@ -327,8 +309,7 @@ public abstract class SharedRMCDamageableSystem : EntitySystem
 
     private bool CanDamage(Entity<DamageOverTimeComponent> damage, Entity<MobStateComponent?> target)
     {
-        if (damage.Comp.BarricadeDamage != null && _barricadeQuery.HasComp(target))
-            return true;
+
 
         if (!Resolve(target, ref target.Comp, false))
             return false;
@@ -411,8 +392,6 @@ public abstract class SharedRMCDamageableSystem : EntitySystem
                 var anchoredEnumerator = _rmcMap.GetAnchoredEntitiesEnumerator(uid);
                 while (anchoredEnumerator.MoveNext(out var anchored))
                 {
-                    if (!_barricadeQuery.HasComp(anchored))
-                        continue;
 
                     if (damage.BarricadeDamage == null)
                         continue;

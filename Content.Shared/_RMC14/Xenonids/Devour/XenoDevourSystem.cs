@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Content.Shared._RMC14.Armor;
+// using Content.Shared._RMC14.Armor;
 using Content.Shared._RMC14.Xenonids.Construction.Nest;
 using Content.Shared.ActionBlocker;
 using Content.Shared.Buckle.Components;
@@ -79,7 +79,7 @@ public sealed class XenoDevourSystem : EntitySystem
 
         SubscribeLocalEvent<UsableWhileDevouredComponent, GetMeleeDamageEvent>(OnUsableWhileDevouredGetMeleeDamage);
         SubscribeLocalEvent<UsableWhileDevouredComponent, GetMeleeAttackRateEvent>(OnUsableWhileDevouredGetMeleeAttackRate);
-        SubscribeLocalEvent<UsableWhileDevouredComponent, CMGetArmorPiercingEvent>(OnUsableWhileDevouredGetArmorPiercing);
+       // SubscribeLocalEvent<UsableWhileDevouredComponent, CMGetArmorPiercingEvent>(OnUsableWhileDevouredGetArmorPiercing);
     }
 
     private void OnDevourableCanDropDragged(Entity<DevourableComponent> devourable, ref CanDropDraggedEvent args)
@@ -303,11 +303,11 @@ public sealed class XenoDevourSystem : EntitySystem
             args.Rate *= ent.Comp.AttackRateMultiplier;
     }
 
-    private void OnUsableWhileDevouredGetArmorPiercing(Entity<UsableWhileDevouredComponent> ent, ref CMGetArmorPiercingEvent args)
-    {
-        if (IsHeldByDevoured(ent))
-            args.Piercing += 100;
-    }
+///    private void OnUsableWhileDevouredGetArmorPiercing(Entity<UsableWhileDevouredComponent> ent, ref CMGetArmorPiercingEvent args)
+///    {
+///        if (IsHeldByDevoured(ent))
+///            args.Piercing += 100;
+///    }
 
     private bool IsHeldByDevoured(EntityUid item)
     {

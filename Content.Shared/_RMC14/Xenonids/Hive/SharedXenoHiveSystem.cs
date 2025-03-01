@@ -1,20 +1,15 @@
-﻿using Content.Shared._RMC14.Dropship;
-using Content.Shared._RMC14.NightVision;
+﻿using Content.Shared._RMC14.NightVision;
 using Content.Shared._RMC14.Xenonids.Announce;
 using Content.Shared._RMC14.Xenonids.Construction;
 using Content.Shared._RMC14.Xenonids.Evolution;
-using Content.Shared.Administration.Logs;
-using Content.Shared.Database;
 using Content.Shared.FixedPoint;
 using Content.Shared.Mind;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
-using Robust.Shared.Map;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
-using Robust.Shared.Spawners;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
 
@@ -22,7 +17,6 @@ namespace Content.Shared._RMC14.Xenonids.Hive;
 
 public abstract class SharedXenoHiveSystem : EntitySystem
 {
-    [Dependency] private readonly ISharedAdminLogManager _adminLog = default!;
     [Dependency] private readonly IComponentFactory _compFactory = default!;
     [Dependency] private readonly SharedXenoHiveSystem _hive = default!;
     [Dependency] private readonly SharedMindSystem _mind = default!;
@@ -44,32 +38,10 @@ public abstract class SharedXenoHiveSystem : EntitySystem
         _query = GetEntityQuery<HiveComponent>();
         _memberQuery = GetEntityQuery<HiveMemberComponent>();
 
-        SubscribeLocalEvent<DropshipHijackStartEvent>(OnDropshipHijackStart);
 
         SubscribeLocalEvent<HiveComponent, MapInitEvent>(OnMapInit);
 
         SubscribeLocalEvent<XenoEvolutionGranterComponent, MobStateChangedEvent>(OnGranterMobStateChanged);
-    }
-
-    private void OnDropshipHijackStart(ref DropshipHijackStartEvent ev)
-    {
-        var hives = EntityQueryEnumerator<HiveComponent>();
-        while (hives.MoveNext(out var uid, out var hive))
-        {
-            if (hive.HijackSurged)
-                continue;
-
-            hive.HijackSurged = true;
-            Dirty(uid, hive);
-
-            var boost = Spawn(null, MapCoordinates.Nullspace);
-            var evoOverride = EnsureComp<EvolutionOverrideComponent>(boost);
-            evoOverride.Amount = 10;
-            Dirty(boost, evoOverride);
-
-            EnsureComp<TimedDespawnComponent>(boost).Lifetime = 180;
-            break;
-        }
     }
 
     private void OnGranterMobStateChanged(Entity<XenoEvolutionGranterComponent> ent, ref MobStateChangedEvent args)
@@ -325,7 +297,6 @@ public abstract class SharedXenoHiveSystem : EntitySystem
             _mind.TransferTo(newMind, larva, ghostCheckOverride: true);
         }
 
-        _adminLog.Add(LogType.RMCBurrowedLarva, $"{ToPrettyString(user):player} took a burrowed larva from hive {ToPrettyString(hive):hive}.");
     }
 }
 

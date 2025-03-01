@@ -1,4 +1,3 @@
-using Content.Shared._RMC14.Atmos;
 using Content.Shared._RMC14.Hands;
 using Content.Shared._RMC14.Xenonids.Construction.Nest;
 using Content.Shared._RMC14.Xenonids.Hive;
@@ -227,13 +226,6 @@ public abstract partial class SharedXenoParasiteSystem : EntitySystem
         if (!HasComp<ParasiteAIComponent>(ent))
         {
             _popup.PopupClient(Loc.GetString("rmc-xeno-parasite-player-pickup", ("parasite", ent)), ent, args.User, PopupType.SmallCaution);
-            args.Cancel();
-            return;
-        }
-
-        if (HasComp<OnFireComponent>(args.User))
-        {
-            _popup.PopupClient("Touching the parasite while you're on fire would burn it!", ent, args.User, PopupType.MediumCaution);
             args.Cancel();
             return;
         }

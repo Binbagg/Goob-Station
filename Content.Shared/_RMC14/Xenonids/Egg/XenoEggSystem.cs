@@ -1,8 +1,5 @@
-using Content.Shared._RMC14.Dropship;
 using Content.Shared._RMC14.Hands;
-using Content.Shared._RMC14.Marines;
 using Content.Shared._RMC14.Xenonids.Construction;
-using Content.Shared._RMC14.Xenonids.Construction.Tunnel;
 using Content.Shared._RMC14.Xenonids.Hive;
 using Content.Shared._RMC14.Xenonids.Parasite;
 using Content.Shared._RMC14.Xenonids.Plasma;
@@ -82,7 +79,6 @@ public sealed class XenoEggSystem : EntitySystem
     {
         _stepTriggerQuery = GetEntityQuery<StepTriggerComponent>();
 
-        SubscribeLocalEvent<DropshipHijackStartEvent>(OnDropshipHijackStart);
 
         SubscribeLocalEvent<XenoComponent, XenoGrowOvipositorActionEvent>(OnXenoGrowOvipositorAction);
         SubscribeLocalEvent<XenoComponent, XenoGrowOvipositorDoAfterEvent>(OnXenoGrowOvipositorDoAfter);
@@ -105,18 +101,6 @@ public sealed class XenoEggSystem : EntitySystem
         SubscribeLocalEvent<XenoEggComponent, GetVerbsEvent<ActivationVerb>>(OnGetVerbs);
     }
 
-    private void OnDropshipHijackStart(ref DropshipHijackStartEvent ev)
-    {
-        var query = EntityQueryEnumerator<XenoOvipositorCapableComponent>();
-        while (query.MoveNext(out var uid, out _))
-        {
-            foreach (var (actionId, action) in _actions.GetActions(uid))
-            {
-                if (action.BaseEvent is XenoGrowOvipositorActionEvent)
-                    _actions.ClearCooldown(actionId);
-            }
-        }
-    }
 
     private void OnXenoGrowOvipositorAction(Entity<XenoComponent> xeno, ref XenoGrowOvipositorActionEvent args)
     {
@@ -551,17 +535,6 @@ public sealed class XenoEggSystem : EntitySystem
 
     private bool CanPlaceEggPopup(EntityUid user, Entity<XenoEggComponent> egg, EntityCoordinates coordinates, bool handled)
     {
-        if (HasComp<MarineComponent>(user))
-        {
-            // TODO RMC14 this should have a better filter than marine component
-            if (!handled)
-            {
-                _hands.TryDrop(user, egg, coordinates);
-                _popup.PopupClient(Loc.GetString("cm-xeno-egg-failed-plant-outside"), user, user);
-            }
-
-            return false;
-        }
 
         if (_transform.GetGrid(coordinates) is not { } gridId ||
             !TryComp(gridId, out MapGridComponent? grid))
@@ -583,8 +556,7 @@ public sealed class XenoEggSystem : EntitySystem
 
             if (HasComp<XenoConstructComponent>(uid) ||
                 _tags.HasAnyTag(uid.Value, StructureTag, AirlockTag) ||
-                HasComp<StrapComponent>(uid) ||
-                HasComp<XenoTunnelComponent>(uid))
+                HasComp<StrapComponent>(uid))
             {
                 var msg = Loc.GetString("cm-xeno-egg-blocked");
                 _popup.PopupClient(msg, uid.Value, user, PopupType.SmallCaution);
