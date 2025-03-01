@@ -1,7 +1,6 @@
 ﻿using Content.Client._RMC14.Xenonids.UI;
 using Content.Client.Message;
 using Content.Shared._RMC14.Xenonids.Evolution;
-using Content.Shared._RMC14.Xenonids.Strain;
 using Content.Shared.FixedPoint;
 using JetBrains.Annotations;
 using Robust.Client.GameObjects;
@@ -75,16 +74,6 @@ public sealed class XenoEvolutionBui : BoundUserInterface
 
         var control = new XenoChoiceControl();
         var name = strain.Name;
-        if (strain.TryGetComponent(out XenoStrainComponent? strainComp, _compFactory))
-        {
-            name = $"{Loc.GetString(strainComp.Name)} {name}";
-
-            if (strainComp.Description is { } description)
-            {
-                control.Button.ToolTip = Loc.GetString(description);
-                control.Button.TooltipDelay = 0.1f;
-            }
-        }
 
         control.Set(name, _sprite.Frame0(strain));
 
