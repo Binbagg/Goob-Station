@@ -30,6 +30,9 @@ public abstract class SharedChatSystem : EntitySystem
 
     public static string DefaultChannelPrefix = $"{RadioChannelPrefix}{DefaultChannelKey}";
 
+    [ValidatePrototypeId<RadioChannelPrototype>]
+    public const string HivemindChannel = "Hivemind";
+
     [ValidatePrototypeId<SpeechVerbPrototype>]
     public const string DefaultSpeechVerb = "Default";
 
